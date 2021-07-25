@@ -150,7 +150,7 @@ public class GameScript : MonoBehaviour
                 _buttonsList[i].image.sprite = Resources.Load<Sprite>($"Images/Alphabet/{word.ToLowerInvariant()}");
                 _clip[i] = Resources.Load<AudioClip>($"Audios/PictureAudios/{_buttonsList[i].image.sprite.name.ToLowerInvariant()}");
             }
-            _wordsList[i].autoSizeTextContainer = true;
+            //_wordsList[i].autoSizeTextContainer = true;
         }
     }
 
