@@ -95,7 +95,6 @@ public class PrepositionsScript : MonoBehaviour
 
             IncreaseCurrentIndex();
             CheckIfGameFinished();
-            GenerateScene();
         }
     }
 
@@ -106,7 +105,11 @@ public class PrepositionsScript : MonoBehaviour
 
     private void CheckIfGameFinished()
     {
-        if (_currentIndex != _prepositions.Count()) return;
+        if (_currentIndex != _prepositions.Count())
+        {
+            GenerateScene();
+            return;
+        }
         _currentIndex = 0;
 
         if (count != 0)
@@ -174,7 +177,7 @@ public class PrepositionsScript : MonoBehaviour
 
         for (int i = 0; i < _prepositionsList.Count; i++)
         {
-            var randomPreposition = GenerateRandomPreposition();
+            var randomPreposition = GenerateRandomPreposition(i);
 
             if (i != _correctAnswerPosition)
             {
@@ -186,15 +189,26 @@ public class PrepositionsScript : MonoBehaviour
         }
     }
 
-    private string GenerateRandomPreposition()
+    private string GenerateRandomPreposition(int currentIndex)
     {
         var currentPreposition = _preposition.sprite.name;
         currentPreposition = currentPreposition.Substring(4, currentPreposition.Length - 4);
-        Debug.Log(currentPreposition);
+
+        var otherPreposition = 0;
+
+        for(int i = 0; i < 3; i++)
+        {
+            if (i != _correctAnswerPosition && i != currentIndex) 
+                otherPreposition = i;
+        }
+       
         while (true)
         {
-            var randomLetterPosition = _rand.Next(_prepositions.Length);
-            if (!_prepositions[randomLetterPosition].Equals(currentPreposition)) return _prepositions[randomLetterPosition];
+            var randomPrepositionPosition = _rand.Next(_prepositions.Length);
+
+            if (!_prepositions[randomPrepositionPosition].Equals(currentPreposition) && !_prepositions[randomPrepositionPosition].Equals(_prepositionsList[otherPreposition].text)) 
+                return _prepositions[randomPrepositionPosition];
+             
         }
     }
 
