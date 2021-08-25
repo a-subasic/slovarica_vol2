@@ -14,7 +14,9 @@ using Random = System.Random;
 public class PrepositionsScript : MonoBehaviour
 {
     private static string[] _prepositions = { "iza", "ispred", "pored", "između", "iznad", "ispod", "u", "na" };
+    private static string[] _sentences = { "Miš se nalazi iza sira.", "Miš je ispred sira.", "Miš je pored sira.", "Miš se nalazi između sireva.", "Miš je iznad sira.", "Miš se nalazi ispod.", "Miš je u siru.", "Miš je na siru." };
     private TextMeshProUGUI _result;
+    private TextMeshProUGUI _sentence;
     private List<TextMeshProUGUI> _prepositionsList;
     private Image _preposition;
     private string _currentPrepositionText;
@@ -23,6 +25,7 @@ public class PrepositionsScript : MonoBehaviour
     private static int _correctAnswerPosition = 0, _currentIndex;
     AudioSource _audioSource;
     private static AudioClip[] _clip = new AudioClip[3];
+    private static AudioClip _sentenceClip;
     private static bool _hovered;
     private static float _currentStatus, _speed = 15;
     private static Button _hoveredButton;
@@ -34,6 +37,7 @@ public class PrepositionsScript : MonoBehaviour
         _preposition = GameObject.Find("Preposition").GetComponent<Image>();
         _currentPrepositionText = _preposition.sprite.name;
         _result = GameObject.Find("Result").GetComponent<TextMeshProUGUI>();
+        _sentence = GameObject.Find("Sentence").GetComponent<TextMeshProUGUI>();
 
         _prepositionsList = new List<TextMeshProUGUI>()
         {
@@ -164,7 +168,11 @@ public class PrepositionsScript : MonoBehaviour
 
     private void GenerateScene()
     {
-        _currentPrepositionText = _prepositions[_rand.Next(_prepositions.Length)];
+        var rand = _rand.Next(_prepositions.Length);
+        _currentPrepositionText = _prepositions[rand];
+        _sentence.text = _sentences[rand];
+        _sentenceClip = Resources.Load<AudioClip>($"Audios/{_imagesFolder}/Sentences/{_currentPrepositionText}");
+
         _preposition.sprite = Resources.Load<Sprite>($"Images/{_imagesFolder}/mis_{_currentPrepositionText}");
 
         _correctAnswerPosition = _rand.Next(_prepositionsList.Count);
@@ -219,11 +227,11 @@ public class PrepositionsScript : MonoBehaviour
         if (button.name.Contains("irst")) _audioSource.PlayOneShot(_clip[0]);
         else if (button.name.Contains("econd")) _audioSource.PlayOneShot(_clip[1]);
         else if (button.name.Contains("hird")) _audioSource.PlayOneShot(_clip[2]);
+        else if (button.name.Contains("entence")) _audioSource.PlayOneShot(_sentenceClip);
     }
 
     public void ButtonHovered(Button button)
     {
-        Debug.Log("entered");
         //Image progress = null, progressLoading = null, progressCenter = null;
         //if (button.name.Contains("irst"))
         //{
@@ -254,7 +262,6 @@ public class PrepositionsScript : MonoBehaviour
 
     public void ButtonHoverLeft(Button button)
     {
-        Debug.Log("left");
         //Image progress = null, progressLoading = null, progressCenter = null;
         //if (button.name.Contains("irst"))
         //{
