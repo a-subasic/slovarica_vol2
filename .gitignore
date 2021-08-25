@@ -55,10 +55,10 @@ sysinfo.txt
 Assets/SandBox/
 
 # build ignore
+.idea/
+.idea/**/**/*
 Slovarica_Data/
 MonoBleedingEdge/
 [Ll]ogs/
 *.exe
 *.dll
-*.mp3
-*.meta.mp3
