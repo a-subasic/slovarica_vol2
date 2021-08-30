@@ -14,7 +14,8 @@ using Random = System.Random;
 public class PrepositionsScript : MonoBehaviour
 {
     private static string[] _prepositions = { "iza", "ispred", "pored", "između", "iznad", "ispod", "u", "na" };
-    private static string[] _sentences = { "Miš se nalazi iza sira.", "Miš je ispred sira.", "Miš je pored sira.", "Miš se nalazi između sireva.", "Miš je iznad sira.", "Miš se nalazi ispod.", "Miš je u siru.", "Miš je na siru." };
+    private static string[] _sentences = { "Zec se nalazi ____ stabla.", "Slon se nalazi ____ stolice.", "Djevojčica sjedi ____ kutije.", "Mačka se nalazi ____ dva psa.", "Ptica leti ____ kocke.", "Pas spava ____ stola.", "Ptica sjedi ____ gnijezdu.", "Medvjedić stoji ____ stolu." };
+    List<int> shownPrepositions = new List<int>();
     private TextMeshProUGUI _result;
     private TextMeshProUGUI _sentence;
     private List<TextMeshProUGUI> _prepositionsList;
@@ -26,9 +27,11 @@ public class PrepositionsScript : MonoBehaviour
     AudioSource _audioSource;
     private static AudioClip[] _clip = new AudioClip[3];
     private static AudioClip _sentenceClip;
+    private static AudioClip _questionClip;
     private static bool _hovered;
     private static float _currentStatus, _speed = 15;
     private static Button _hoveredButton;
+    private static Button _questionButton;
     private static string _imagesFolder = "Prepositions";
     private static double percentage = 0, count = 0, points = 0;
 
@@ -38,6 +41,7 @@ public class PrepositionsScript : MonoBehaviour
         _currentPrepositionText = _preposition.sprite.name;
         _result = GameObject.Find("Result").GetComponent<TextMeshProUGUI>();
         _sentence = GameObject.Find("Sentence").GetComponent<TextMeshProUGUI>();
+        _questionButton = GameObject.Find("QuestionAudio").GetComponent<Button>();
 
         _prepositionsList = new List<TextMeshProUGUI>()
         {
@@ -90,16 +94,25 @@ public class PrepositionsScript : MonoBehaviour
             try
             {
                 _audioSource = GetComponent<AudioSource>();
+              
                 var resultAudios = Resources.LoadAll<AudioClip>($"Audios/ResultAudios/Correct");
-                _audioSource.PlayOneShot(resultAudios[_rand.Next(resultAudios.Length)]);
+                var resultAudio = resultAudios[_rand.Next(resultAudios.Length)];
+                _audioSource.PlayOneShot(resultAudio);
+                _audioSource.clip = resultAudio;
 
+                if (_audioSource.clip) 
+                    Invoke("NextPreposition", _audioSource.clip.length);
             }
-            catch (Exception e) { }
-            _result.text = "";
 
-            IncreaseCurrentIndex();
-            CheckIfGameFinished();
+            catch (Exception e) { Debug.Log(e); }
+            _result.text = "";
         }
+    }
+
+    void NextPreposition()
+    {
+        IncreaseCurrentIndex();
+        CheckIfGameFinished();
     }
 
     private void IncreaseCurrentIndex()
@@ -149,9 +162,8 @@ public class PrepositionsScript : MonoBehaviour
                 _audioSource = GetComponent<AudioSource>();
                 var resultAudios = Resources.LoadAll<AudioClip>($"Audios/ResultAudios/Wrong");
                 _audioSource.PlayOneShot(resultAudios[_rand.Next(resultAudios.Length)]);
-
             }
-            catch (Exception e) { }
+            catch (Exception e) { Debug.Log(e); }
             Thread.Sleep(500);
         }
     }
@@ -169,7 +181,16 @@ public class PrepositionsScript : MonoBehaviour
     private void GenerateScene()
     {
         var rand = _rand.Next(_prepositions.Length);
+
+        while (shownPrepositions.Contains(rand))
+        {
+            rand = _rand.Next(_prepositions.Length);
+        }
+
+        shownPrepositions.Add(rand);
+        
         _currentPrepositionText = _prepositions[rand];
+
         _sentence.text = _sentences[rand];
         _sentenceClip = Resources.Load<AudioClip>($"Audios/{_imagesFolder}/Sentences/{_currentPrepositionText}");
 
@@ -195,6 +216,9 @@ public class PrepositionsScript : MonoBehaviour
             }
             _prepositionsList[i].autoSizeTextContainer = true;
         }
+
+        _questionClip = Resources.Load<AudioClip>($"Audios/{_imagesFolder}/Sentences/Questions/{_currentPrepositionText}");
+        PlayAudio(_questionButton);
     }
 
     private string GenerateRandomPreposition(int currentIndex)
@@ -223,11 +247,14 @@ public class PrepositionsScript : MonoBehaviour
     public void PlayAudio(Button button)
     {
         _audioSource = GetComponent<AudioSource>();
+        
+        if (_audioSource == null) return;
 
         if (button.name.Contains("irst")) _audioSource.PlayOneShot(_clip[0]);
         else if (button.name.Contains("econd")) _audioSource.PlayOneShot(_clip[1]);
         else if (button.name.Contains("hird")) _audioSource.PlayOneShot(_clip[2]);
         else if (button.name.Contains("entence")) _audioSource.PlayOneShot(_sentenceClip);
+        else if (button.name.Contains("uestion")) _audioSource.PlayOneShot(_questionClip);
     }
 
     public void ButtonHovered(Button button)

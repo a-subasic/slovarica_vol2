@@ -126,7 +126,7 @@ public class GameScript : MonoBehaviour
                 var resultAudios = Resources.LoadAll<AudioClip>($"Audios/ResultAudios/Correct");
                 _audioSource.PlayOneShot(resultAudios[_rand.Next(resultAudios.Length)]);
           
-            } catch (Exception e) { }
+            } catch (Exception e) { Debug.Log(e); }
             _result.text = "";
             //_currentIndex++;
             IncreaseCurrentIndex();
@@ -277,7 +277,7 @@ public class GameScript : MonoBehaviour
                 _audioSource.PlayOneShot(resultAudios[_rand.Next(resultAudios.Length)]);
 
             }
-            catch (Exception e) { }
+            catch (Exception e) { Debug.Log(e); }
             Thread.Sleep(500);
         }
     }
