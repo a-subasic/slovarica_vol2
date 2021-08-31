@@ -17,4 +17,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Game/Slovarica/Prepositions.unity
     guid: f6e7b27871c27c0489af220401f9589c
+  - enabled: 1
+    path: Assets/Scenes/Game/Slovarica/EndGamePrepositions.unity
+    guid: 31c32ccf121f50f44ab3f81349c2e98a
   m_configObjects: {}

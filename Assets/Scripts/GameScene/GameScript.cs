@@ -250,7 +250,7 @@ public class GameScript : MonoBehaviour
         } else { 
             percentage = 0;
         }
-        GameObject.Find("ScoreScript").GetComponent<ScoreScript>().save_score(Math.Round(percentage, 1), DateTime.Now.ToString("M/d/yyyy"));
+        GameObject.Find("ScoreScript").GetComponent<ScoreScript>().save_score(_choiceType, Math.Round(percentage, 1), DateTime.Now.ToString("M/d/yyyy"));
         percentage = 0;
         count = 0;
         points = 0;

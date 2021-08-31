@@ -13,19 +13,16 @@ public class ScoreScript : MonoBehaviour
 
     private List<TextMeshProUGUI> _gameModeList;
     private List<TextMeshProUGUI> _resultList;
-
-    //public string date;
-
-
-
+    private List<TextMeshProUGUI> _dateList;
+    private string type;
     // Start is called before the first frame update
     void Start()
     {
         if (!File.Exists(@"scores.txt"))
         {
             StreamWriter sw = new StreamWriter(@"scores.txt", append: true);
-            string output = "-|-||";
-            for(int i  = 0; i < 6; i++)
+            string output = "-|-|-|";
+            for(int i  = 0; i < 7; i++)
             {
                 sw.WriteLine(output);
             }
@@ -33,19 +30,36 @@ public class ScoreScript : MonoBehaviour
         }
     }
 
-    // Update is called once per frame
-    //void Update()
-    //{
-        
-    //}
-
-    public void save_score(double percentage, string date)
+    void Update()
     {
+        show_score();
+    }
+
+    public void save_score(string choiceType, double percentage, string date)
+    {
+        switch (choiceType)
+        {
+            case "ALL":
+                type = "Sva slova";
+                break;
+            case "SA":
+                type = "Samoglasnici";
+                break;
+            case "SU":
+                type = "Suglasnici";
+                break;
+            case "ML":
+                type = "Moja slova";
+                break;
+            case "Prijedlozi":
+                type = "Prijedlozi";
+                break;
+        }
         StreamWriter sw = new StreamWriter(@"scores.txt", append:true);
-        string output = date + "|" + percentage.ToString() + "||";
+        string output = date + "|" + type + "|" + percentage.ToString() + "|";
         sw.WriteLine(output);
         sw.Close();
-        if (File.ReadAllLines(@"scores.txt").Count() > 6)
+        if (File.ReadAllLines(@"scores.txt").Count() > 7)
         {
             List<string> lines = File.ReadAllLines(@"scores.txt").ToList();
             File.WriteAllLines(@"scores.txt", lines.GetRange(1, lines.Count-1).ToArray());
@@ -62,6 +76,7 @@ public class ScoreScript : MonoBehaviour
             GameObject.Find("GameMode4").GetComponent<TextMeshProUGUI>(),
             GameObject.Find("GameMode5").GetComponent<TextMeshProUGUI>(),
             GameObject.Find("GameMode6").GetComponent<TextMeshProUGUI>(),
+            GameObject.Find("GameMode7").GetComponent<TextMeshProUGUI>(),
         };
 
         _resultList = new List<TextMeshProUGUI>()
@@ -72,6 +87,18 @@ public class ScoreScript : MonoBehaviour
             GameObject.Find("Result4").GetComponent<TextMeshProUGUI>(),
             GameObject.Find("Result5").GetComponent<TextMeshProUGUI>(),
             GameObject.Find("Result6").GetComponent<TextMeshProUGUI>(),
+            GameObject.Find("Result7").GetComponent<TextMeshProUGUI>(),
+        };
+
+        _dateList = new List<TextMeshProUGUI>()
+        {
+            GameObject.Find("Date1").GetComponent<TextMeshProUGUI>(),
+            GameObject.Find("Date2").GetComponent<TextMeshProUGUI>(),
+            GameObject.Find("Date3").GetComponent<TextMeshProUGUI>(),
+            GameObject.Find("Date4").GetComponent<TextMeshProUGUI>(),
+            GameObject.Find("Date5").GetComponent<TextMeshProUGUI>(),
+            GameObject.Find("Date6").GetComponent<TextMeshProUGUI>(),
+            GameObject.Find("Date7").GetComponent<TextMeshProUGUI>(),
         };
 
         var lines = File.ReadAllLines(@"scores.txt").Reverse();
@@ -79,22 +106,15 @@ public class ScoreScript : MonoBehaviour
         int i = 0;
         foreach (string line in lines)
         {
-            int To1 = line.IndexOf("|") + "|".Length;
-            int From2 = line.IndexOf("|") + "|".Length;
-            int To2 = line.LastIndexOf("||");
+            var listStrLineElements = line.Split('|').ToList();
+            Debug.Log(listStrLineElements[0]);
+            Debug.Log(listStrLineElements[1]);
+            Debug.Log(listStrLineElements[2]);
 
-            _gameModeList[i].text = line.Substring(0, To1-1);
-            if ("-".Equals(line.Substring(From2, To2 - From2)))
-            {
-                _resultList[i].text = line.Substring(From2, To2 - From2);
-            } else
-            {
-                _resultList[i].text = line.Substring(From2, To2 - From2) + "%";
-            }
-            
+            _gameModeList[i].text = i + 1 + "." + " " + listStrLineElements[1];
+            _resultList[i].text = listStrLineElements[2] + "%";
 
             i++;
-            //Debug.Log(line.Substring(0, To1 - 0) + " *** " + line.Substring(From2, To2 - From2 ));
         }
     }
 }
