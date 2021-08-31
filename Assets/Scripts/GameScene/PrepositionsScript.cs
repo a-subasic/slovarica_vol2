@@ -14,7 +14,7 @@ using Random = System.Random;
 public class PrepositionsScript : MonoBehaviour
 {
     private static string[] _prepositions = { "iza", "ispred", "pored", "između", "iznad", "ispod", "u", "na" };
-    private static string[] _sentences = { "Zec se nalazi ____ stabla.", "Slon se nalazi ____ stolice.", "Djevojčica sjedi ____ kutije.", "Mačka se nalazi ____ dva psa.", "Ptica leti ____ kocke.", "Pas spava ____ stola.", "Ptica sjedi ____ gnijezdu.", "Medvjedić stoji ____ stolu." };
+    private static string[] _sentences = { "Zec se nalazi ____ stabla.", "Slon se nalazi ____ stolice.", "Djevojčica sjedi ____ kutije.", "Mačka se nalazi ____ dva psa.", "Ptica leti ____ kutije.", "Pas spava ____ stola.", "Ptica sjedi ____ gnijezdu.", "Medvjedić stoji ____ stolu." };
     List<int> shownPrepositions = new List<int>();
     private TextMeshProUGUI _result;
     private TextMeshProUGUI _sentence;
@@ -34,9 +34,13 @@ public class PrepositionsScript : MonoBehaviour
     private static Button _questionButton;
     private static string _imagesFolder = "Prepositions";
     private static double percentage = 0, count = 0, points = 0;
+    private string _dwellStatus;
+    private int rand;
 
     void Awake()
     {
+        _dwellStatus = PlayerPrefs.GetString("DWELL");
+
         _preposition = GameObject.Find("Preposition").GetComponent<Image>();
         _currentPrepositionText = _preposition.sprite.name;
         _result = GameObject.Find("Result").GetComponent<TextMeshProUGUI>();
@@ -66,6 +70,7 @@ public class PrepositionsScript : MonoBehaviour
 
     void Update()
     {
+        _dwellStatus = PlayerPrefs.GetString("DWELL");
         _result = GameObject.Find("Result").GetComponent<TextMeshProUGUI>();
 
         if (_hovered)
@@ -94,14 +99,16 @@ public class PrepositionsScript : MonoBehaviour
             try
             {
                 _audioSource = GetComponent<AudioSource>();
-              
+                if (_audioSource == null) _audioSource = gameObject.AddComponent<AudioSource>();
+
                 var resultAudios = Resources.LoadAll<AudioClip>($"Audios/ResultAudios/Correct");
-                var resultAudio = resultAudios[_rand.Next(resultAudios.Length)];
+                var r = _rand.Next(resultAudios.Length);
+                var resultAudio = resultAudios[r];
                 _audioSource.PlayOneShot(resultAudio);
                 _audioSource.clip = resultAudio;
 
-                if (_audioSource.clip) 
-                    Invoke("NextPreposition", _audioSource.clip.length);
+                if (_audioSource.clip)
+                    Invoke("NextPreposition", _audioSource.clip.length + 1);
             }
 
             catch (Exception e) { Debug.Log(e); }
@@ -142,7 +149,7 @@ public class PrepositionsScript : MonoBehaviour
         count = 0;
         points = 0;
 
-        SceneManager.LoadScene("Scenes/Game/Slovarica/EndGameScene");
+        SceneManager.LoadScene("Scenes/Game/Slovarica/EndGamePrepositions");
     }
 
     public void CheckAnswer(Button button)
@@ -160,6 +167,7 @@ public class PrepositionsScript : MonoBehaviour
             try
             {
                 _audioSource = GetComponent<AudioSource>();
+                if (_audioSource == null) _audioSource = gameObject.AddComponent<AudioSource>();
                 var resultAudios = Resources.LoadAll<AudioClip>($"Audios/ResultAudios/Wrong");
                 _audioSource.PlayOneShot(resultAudios[_rand.Next(resultAudios.Length)]);
             }
@@ -180,15 +188,19 @@ public class PrepositionsScript : MonoBehaviour
 
     private void GenerateScene()
     {
-        var rand = _rand.Next(_prepositions.Length);
+        var rand = 0;
 
-        while (shownPrepositions.Contains(rand))
+        if (!_dwellStatus.Equals("T"))
         {
             rand = _rand.Next(_prepositions.Length);
+            while(shownPrepositions.Contains(rand)) rand = _rand.Next(_prepositions.Length);
+            shownPrepositions.Add(rand);
+        }
+        else
+        {
+            rand = _currentIndex;
         }
 
-        shownPrepositions.Add(rand);
-        
         _currentPrepositionText = _prepositions[rand];
 
         _sentence.text = _sentences[rand];
@@ -259,61 +271,61 @@ public class PrepositionsScript : MonoBehaviour
 
     public void ButtonHovered(Button button)
     {
-        //Image progress = null, progressLoading = null, progressCenter = null;
-        //if (button.name.Contains("irst"))
-        //{
-        //    progress = GameObject.Find("FirstProgressBar").GetComponent<Image>();
-        //    progressLoading = GameObject.Find("FirstLoadingBar").GetComponent<Image>();
-        //    progressCenter = GameObject.Find("FirstCenter").GetComponent<Image>();
-        //}
-        //else if (button.name.Contains("econd"))
-        //{
-        //    progress = GameObject.Find("SecondProgressBar").GetComponent<Image>();
-        //    progressLoading = GameObject.Find("SecondLoadingBar").GetComponent<Image>();
-        //    progressCenter = GameObject.Find("SecondCenter").GetComponent<Image>();
-        //}
-        //else if (button.name.Contains("hird"))
-        //{
-        //    progress = GameObject.Find("ThirdProgressBar").GetComponent<Image>();
-        //    progressLoading = GameObject.Find("ThirdLoadingBar").GetComponent<Image>();
-        //    progressCenter = GameObject.Find("ThirdCenter").GetComponent<Image>();
-        //}
+        Image progress = null, progressLoading = null, progressCenter = null;
+        if (button.name.Contains("irst"))
+        {
+            progress = GameObject.Find("FirstProgressBar").GetComponent<Image>();
+            progressLoading = GameObject.Find("FirstLoadingBar").GetComponent<Image>();
+            progressCenter = GameObject.Find("FirstCenter").GetComponent<Image>();
+        }
+        else if (button.name.Contains("econd"))
+        {
+            progress = GameObject.Find("SecondProgressBar").GetComponent<Image>();
+            progressLoading = GameObject.Find("SecondLoadingBar").GetComponent<Image>();
+            progressCenter = GameObject.Find("SecondCenter").GetComponent<Image>();
+        }
+        else if (button.name.Contains("hird"))
+        {
+            progress = GameObject.Find("ThirdProgressBar").GetComponent<Image>();
+            progressLoading = GameObject.Find("ThirdLoadingBar").GetComponent<Image>();
+            progressCenter = GameObject.Find("ThirdCenter").GetComponent<Image>();
+        }
 
-        //if (!_dwellStatus.Equals("T")) return;
-        //progress.enabled = true;
-        //progressCenter.enabled = true;
-        //progressLoading.enabled = true;
-        //_hovered = true;
-        //_hoveredButton = button;
+        if (!_dwellStatus.Equals("T")) return;
+        progress.enabled = true;
+        progressCenter.enabled = true;
+        progressLoading.enabled = true;
+        _hovered = true;
+        _hoveredButton = button;
     }
 
     public void ButtonHoverLeft(Button button)
     {
-        //Image progress = null, progressLoading = null, progressCenter = null;
-        //if (button.name.Contains("irst"))
-        //{
-        //    progress = GameObject.Find("FirstProgressBar").GetComponent<Image>();
-        //    progressLoading = GameObject.Find("FirstLoadingBar").GetComponent<Image>();
-        //    progressCenter = GameObject.Find("FirstCenter").GetComponent<Image>();
-        //}
-        //else if (button.name.Contains("econd"))
-        //{
-        //    progress = GameObject.Find("SecondProgressBar").GetComponent<Image>();
-        //    progressLoading = GameObject.Find("SecondLoadingBar").GetComponent<Image>();
-        //    progressCenter = GameObject.Find("SecondCenter").GetComponent<Image>();
-        //}
-        //else if (button.name.Contains("hird"))
-        //{
-        //    progress = GameObject.Find("ThirdProgressBar").GetComponent<Image>();
-        //    progressLoading = GameObject.Find("ThirdLoadingBar").GetComponent<Image>();
-        //    progressCenter = GameObject.Find("ThirdCenter").GetComponent<Image>();
-        //}
+        Image progress = null, progressLoading = null, progressCenter = null;
+        if (button.name.Contains("irst"))
+        {
+            progress = GameObject.Find("FirstProgressBar").GetComponent<Image>();
+            progressLoading = GameObject.Find("FirstLoadingBar").GetComponent<Image>();
+            progressCenter = GameObject.Find("FirstCenter").GetComponent<Image>();
+        }
+        else if (button.name.Contains("econd"))
+        {
+            progress = GameObject.Find("SecondProgressBar").GetComponent<Image>();
+            progressLoading = GameObject.Find("SecondLoadingBar").GetComponent<Image>();
+            progressCenter = GameObject.Find("SecondCenter").GetComponent<Image>();
+        }
+        else if (button.name.Contains("hird"))
+        {
+            progress = GameObject.Find("ThirdProgressBar").GetComponent<Image>();
+            progressLoading = GameObject.Find("ThirdLoadingBar").GetComponent<Image>();
+            progressCenter = GameObject.Find("ThirdCenter").GetComponent<Image>();
+        }
 
-        //if (!_dwellStatus.Equals("T")) return;
-        //progress.enabled = false;
-        //progressCenter.enabled = false;
-        //progressLoading.enabled = false;
-        //_hovered = false;
-        //_currentStatus = 0;
+        if (!_dwellStatus.Equals("T")) return;
+        progress.enabled = false;
+        progressCenter.enabled = false;
+        progressLoading.enabled = false;
+        _hovered = false;
+        _currentStatus = 0;
     }
 }

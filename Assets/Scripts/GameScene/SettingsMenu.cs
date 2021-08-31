@@ -8,6 +8,7 @@ public class SettingsMenu : MonoBehaviour
 {
     public GameObject LetterChecker; //checker za veliko slovo A
     public GameObject DwellChecker;
+
     void Start() {
       
         if (PlayerPrefs.HasKey("LETTER") is true)
