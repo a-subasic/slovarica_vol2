@@ -107,9 +107,6 @@ public class ScoreScript : MonoBehaviour
         foreach (string line in lines)
         {
             var listStrLineElements = line.Split('|').ToList();
-            Debug.Log(listStrLineElements[0]);
-            Debug.Log(listStrLineElements[1]);
-            Debug.Log(listStrLineElements[2]);
 
             _gameModeList[i].text = i + 1 + "." + " " + listStrLineElements[1];
             _resultList[i].text = listStrLineElements[2] + "%";
