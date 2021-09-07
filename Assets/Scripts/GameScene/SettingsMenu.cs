@@ -1,12 +1,10 @@
-﻿﻿using System.Collections;
-using System.Collections.Generic;
-using TMPro;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 public class SettingsMenu : MonoBehaviour
 {
     public GameObject LetterChecker; //checker za veliko slovo A
+    public GameObject SlovoChecker;
     public GameObject DwellChecker;
 
     void Start() {
@@ -23,6 +21,19 @@ public class SettingsMenu : MonoBehaviour
             PlayerPrefs.SetString("LETTER", "A");
             PlayerPrefs.Save();
             Debug.Log("INICIJALNO: A");
+        }
+
+        if (PlayerPrefs.HasKey("SLOVO") is true)
+        {
+            string value = PlayerPrefs.GetString("SLOVO");
+            if (value.Equals("Prvo")) SlovoChecker.transform.GetComponent<Toggle>().isOn = true;
+            else SlovoChecker.transform.GetComponent<Toggle>().isOn = false;
+        }
+        else
+        {
+            PlayerPrefs.SetString("SLOVO", "Prvo");
+            PlayerPrefs.Save();
+            Debug.Log("INICIJALNO: Prvo");
         }
     
         ////LOGIKA ZA DWELL TIME
@@ -47,6 +58,12 @@ public class SettingsMenu : MonoBehaviour
         if (letter is true) PlayerPrefs.SetString("LETTER", "A");
         else PlayerPrefs.SetString("LETTER", "a");
         PlayerPrefs.Save();
+
+        bool slovo = ReadCheckers(SlovoChecker);
+        if (slovo is true) PlayerPrefs.SetString("SLOVO", "Prvo");
+        else PlayerPrefs.SetString("SLOVO", "Zadnje");
+        PlayerPrefs.Save();
+
 
         bool dwell = ReadCheckers(DwellChecker);
         if (dwell is true)

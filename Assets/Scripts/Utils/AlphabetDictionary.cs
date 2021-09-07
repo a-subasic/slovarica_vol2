@@ -15,13 +15,41 @@ namespace Assets.Scripts.Utils
                 switch (category)
                 {
                     case "BASIC":
-                        _alphabetWords.Add(letter, WordsList.CreateBasicAlphabetList(letter));
+                        //if(WordsList.CreateBasicAlphabetList(letter).Count > 0)
+                            _alphabetWords.Add(letter, WordsList.CreateBasicAlphabetList(letter));
                         break;
                     case "FOOD":
-                        _alphabetWords.Add(letter, WordsList.CreateFoodList(letter));
+                        //if(WordsList.CreateBasicAlphabetList(letter).Count > 0)
+                            _alphabetWords.Add(letter, WordsList.CreateFoodList(letter));
                         break;
                     case "ANIMAL":
-                        _alphabetWords.Add(letter, WordsList.CreateAnimalsList(letter));
+                        //if (WordsList.CreateBasicAlphabetList(letter).Count > 0)
+                            _alphabetWords.Add(letter, WordsList.CreateAnimalsList(letter));
+                        break;
+                }
+            }
+
+            return _alphabetWords;
+        }
+
+        public static Dictionary<string, List<string>> CreateReverseDictionary(string category)
+        {
+            _alphabetWords = new Dictionary<string, List<string>>();
+            foreach (var letter in _letters)
+            {
+                switch (category)
+                {
+                    case "BASIC":
+                        //if (ReverseWordsList.CreateBasicAlphabetList(letter).Count > 0)
+                            _alphabetWords.Add(letter, ReverseWordsList.CreateBasicAlphabetList(letter));
+                        break;
+                    case "FOOD":
+                        //if (ReverseWordsList.CreateBasicAlphabetList(letter).Count > 0)
+                            _alphabetWords.Add(letter, ReverseWordsList.CreateFoodList(letter));
+                        break;
+                    case "ANIMAL":
+                        //if (ReverseWordsList.CreateBasicAlphabetList(letter).Count > 0)
+                            _alphabetWords.Add(letter, ReverseWordsList.CreateAnimalsList(letter));
                         break;
                 }
             }

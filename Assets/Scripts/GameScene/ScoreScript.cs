@@ -35,7 +35,7 @@ public class ScoreScript : MonoBehaviour
         show_score();
     }
 
-    public void save_score(string choiceType, double percentage, string date)
+    public void save_score(string choiceType, string letterOrderType, double percentage, string date)
     {
         switch (choiceType)
         {
@@ -55,6 +55,9 @@ public class ScoreScript : MonoBehaviour
                 type = "Prijedlozi";
                 break;
         }
+
+        type += letterOrderType;
+     
         StreamWriter sw = new StreamWriter(@"scores.txt", append:true);
         string output = date + "|" + type + "|" + percentage.ToString() + "|";
         sw.WriteLine(output);
@@ -110,6 +113,7 @@ public class ScoreScript : MonoBehaviour
 
             _gameModeList[i].text = i + 1 + "." + " " + listStrLineElements[1];
             _resultList[i].text = listStrLineElements[2] + "%";
+            _dateList[i].text = listStrLineElements[0];
 
             i++;
         }

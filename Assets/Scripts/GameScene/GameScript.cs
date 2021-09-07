@@ -8,7 +8,6 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using Random = System.Random;
 using System;
-using System.Globalization;
 
 /*
  * ZA REDOSLIJED
@@ -25,6 +24,8 @@ using System.Globalization;
 public class GameScript : MonoBehaviour
 {
     private static string[] _letters = { "A", "B", "C", "Č", "Ć", "D", "DŽ", "Đ", "E", "F", "G", "H", "I", "J", "K", "L", "LJ", "M", "N", "NJ", "O", "P", "R", "S", "Š", "T", "U", "V", "Z", "Ž" };
+    private static string[] _reverseLetters = { "A", "B", "C", "Ć", "D", "E", "I", "J", "K", "L", "M", "N", "NJ", "O", "P", "R", "S", "Š", "T", "U", "V", "Ž" };
+    private static string[] _reverseConsonants = { "B", "C", "Ć", "D", "J", "K", "L", "M", "N", "NJ", "P", "R", "S", "Š", "T", "V", "Ž" };
     private static string[] _vowels = {"A", "E", "I", "O", "U"};
     private static string[] _consonants = { "B", "C", "Č", "Ć", "D", "DŽ", "Đ", "F", "G", "H", "J", "K", "L", "LJ", "M", "N", "NJ", "P", "R", "S", "Š", "T", "V", "Z", "Ž" };
     private static string[] _customLetters;
@@ -39,8 +40,9 @@ public class GameScript : MonoBehaviour
     private static bool _createDictionary = true, _hovered;
     private static float _currentStatus, _speed = 15;
     private static Button _hoveredButton;
-    private string _orderType, _choiceType, _categoryType, _letterType, _myLetters, _dwellStatus;
+    private string _orderType, _choiceType, _categoryType, _letterType, _myLetters, _dwellStatus, _slovoStatus;
     private static string _imagesFolder;
+    private int skippedLetters = 0;
 
     private static double percentage = 0, count = 0, points = 0;
 
@@ -52,8 +54,13 @@ public class GameScript : MonoBehaviour
         _letterType = PlayerPrefs.GetString("LETTER");
         _myLetters = PlayerPrefs.GetString("MYLETTERS");
         _dwellStatus = PlayerPrefs.GetString("DWELL");
+        _slovoStatus = PlayerPrefs.GetString("SLOVO");
 
-        if (_createDictionary) _alphabetDictionary = AlphabetDictionary.CreateDictionary(_categoryType);
+        if (_createDictionary)
+        {
+            if(_slovoStatus == "Prvo") _alphabetDictionary = AlphabetDictionary.CreateDictionary(_categoryType);
+            else _alphabetDictionary = AlphabetDictionary.CreateReverseDictionary(_categoryType);
+        }
 
         _letter = GameObject.Find("Letter").GetComponent<TextMeshProUGUI>();
         _result = GameObject.Find("Result").GetComponent<TextMeshProUGUI>();
@@ -93,11 +100,13 @@ public class GameScript : MonoBehaviour
         _letterType = PlayerPrefs.GetString("LETTER");
         _myLetters = PlayerPrefs.GetString("MYLETTERS");
         _dwellStatus = PlayerPrefs.GetString("DWELL");
+        _slovoStatus = PlayerPrefs.GetString("SLOVO");
 
         _result = GameObject.Find("Result").GetComponent<TextMeshProUGUI>();
 
         SetGameTitle();
         SetGameSubtitle();
+        SetGameSubSubtitle();
 
         if (_hovered)
         {
@@ -124,16 +133,26 @@ public class GameScript : MonoBehaviour
             {
                 _audioSource = GetComponent<AudioSource>();
                 var resultAudios = Resources.LoadAll<AudioClip>($"Audios/ResultAudios/Correct");
-                _audioSource.PlayOneShot(resultAudios[_rand.Next(resultAudios.Length)]);
-          
-            } catch (Exception e) { Debug.Log(e); }
+                //_audioSource.PlayOneShot(resultAudios[_rand.Next(resultAudios.Length)]);
+                var r = _rand.Next(resultAudios.Length);
+                var resultAudio = resultAudios[r];
+                _audioSource.PlayOneShot(resultAudio);
+                _audioSource.clip = resultAudio;
+
+                if (_audioSource.clip)
+                    Invoke("NextPreposition", _audioSource.clip.length + 1);
+            } 
+            
+            catch (Exception e) { Debug.Log(e); }
             _result.text = "";
-            //_currentIndex++;
-            IncreaseCurrentIndex();
-            CheckIfGameFinished();
-            SceneGenerator();
-            //GenerateScene();
         }
+    }
+
+    void NextPreposition()
+    {
+        IncreaseCurrentIndex();
+        CheckIfGameFinished();
+        SceneGenerator();
     }
 
     public static void SetCreateDictionaryState()
@@ -159,21 +178,52 @@ public class GameScript : MonoBehaviour
 
     private void SceneGenerator()
     {
-        switch (_choiceType)
+        if (_slovoStatus == "Prvo")
         {
-            case "ALL":
-                GenerateScene(_letters, _currentIndex);
-                break;
-            case "SA":
-                GenerateScene(_vowels, _vowelsIndex);
-                break;
-            case "SU":
-                GenerateScene(_consonants, _consonantsIndex);
-                break;
-            case "ML":
-                _customLetters = _myLetters.Split(',');
-                GenerateScene(_customLetters, _customLettersIndex);
-                break;
+            switch (_choiceType)
+            {
+                case "ALL":
+                    GenerateScene(_letters, _currentIndex);
+                    break;
+                case "SA":
+                    GenerateScene(_vowels, _vowelsIndex);
+                    break;
+                case "SU":
+                    GenerateScene(_consonants, _consonantsIndex);
+                    break;
+                case "ML":
+                    _customLetters = _myLetters.Split(',');
+                    GenerateScene(_customLetters, _customLettersIndex);
+                    break;
+            }
+        }
+        else
+        {
+            List<string> reverseML = new List<string>();
+
+            switch (_choiceType)
+            {
+                case "ALL":
+                    GenerateScene(_reverseLetters, _currentIndex);
+                    break;
+                case "SA":
+                    GenerateScene(_vowels, _vowelsIndex);
+                    break;
+                case "SU":
+                    GenerateScene(_reverseConsonants, _consonantsIndex);
+                    break;
+                case "ML":
+                    _customLetters = _myLetters.Split(',');
+
+                    foreach(var letter in _customLetters)
+                    {
+                        if (_reverseLetters.Contains(letter.ToLower())) reverseML.Add(letter);
+                    }
+
+                    string[] _reverseML = reverseML.ToArray();
+                    GenerateScene(_reverseML, _customLettersIndex);
+                    break;
+            }
         }
     }
 
@@ -235,9 +285,32 @@ public class GameScript : MonoBehaviour
         }
     }
 
+    private void SetGameSubSubtitle()
+    {
+        var subsubtitle = GameObject.Find("GameSubSubtitle").GetComponent<TextMeshProUGUI>();
+
+        switch (_slovoStatus)
+        {
+            case "Prvo":
+                subsubtitle.text = "Prvo slovo";
+                break;
+            case "Zadnje":
+                subsubtitle.text = "Zadnje slovo";
+                break;
+        }
+    }
+
     private void CheckIfGameFinished()
     {
-        if (_currentIndex != _letters.Count() && _vowelsIndex != _vowels.Length && _consonantsIndex != _consonants.Length && (_customLetters == null || _customLettersIndex != _customLetters.Length - 1)) return;
+        if(_slovoStatus == "Prvo")
+        {
+            if (_currentIndex != _letters.Count() && _vowelsIndex != _vowels.Length && _consonantsIndex != _consonants.Length && (_customLetters == null || _customLettersIndex != _customLetters.Length - 1)) return;
+        }
+        else
+        {
+            if (_currentIndex != _reverseLetters.Count() && _vowelsIndex != _vowels.Length && _consonantsIndex != _reverseConsonants.Length && (_customLetters == null || _customLettersIndex != _customLetters.Length - 1)) return;
+        }
+
         _currentIndex = 0;
         _vowelsIndex = 0;
         _consonantsIndex = 0;
@@ -246,11 +319,12 @@ public class GameScript : MonoBehaviour
 
         if (count != 0)
         {
+            count -= skippedLetters;
             percentage = (points / count) * 100;
         } else { 
             percentage = 0;
         }
-        GameObject.Find("ScoreScript").GetComponent<ScoreScript>().save_score(_choiceType, Math.Round(percentage, 1), DateTime.Now.ToString("M/d/yyyy"));
+        GameObject.Find("ScoreScript").GetComponent<ScoreScript>().save_score(_choiceType, " ("+_slovoStatus+")", Math.Round(percentage, 1), DateTime.Now.ToString("d/M/yyyy"));
         percentage = 0;
         count = 0;
         points = 0;
@@ -307,31 +381,50 @@ public class GameScript : MonoBehaviour
     private void GenerateScene(string[] lettersArray, int currentIndex)
     {
         _letter.text = _orderType.Equals("ABC") ? lettersArray[currentIndex] : lettersArray[_rand.Next(lettersArray.Length)];
-        var l = _letter.text;
+        var l = _letter.text; 
         _letter.text = _letterType.Equals("A") ? _letter.text : _letter.text.ToLowerInvariant();
         _correctAnswerPosition = _rand.Next(_wordsList.Count);
 
-        var correctWord = _alphabetDictionary[l][_rand.Next(_alphabetDictionary[l].Count)];
-        if (CheckIfWordExist(correctWord)) return;
-        _wordsList[_correctAnswerPosition].text = correctWord;
-        _wordsList[_correctAnswerPosition].text = _letterType.Equals("A") ? _wordsList[_correctAnswerPosition].text.ToUpperInvariant() : _wordsList[_correctAnswerPosition].text.ToLowerInvariant();
-        _buttonsList[_correctAnswerPosition].image.sprite = Resources.Load<Sprite>($"Images/{_imagesFolder}/{correctWord.ToLowerInvariant()}");
-        _clip[_correctAnswerPosition] = Resources.Load<AudioClip>($"Audios/{_imagesFolder}/{_buttonsList[_correctAnswerPosition].image.sprite.name.ToLowerInvariant()}");
-
-        for (int i = 0; i < _wordsList.Count; i++)
+        if (_alphabetDictionary[l].Count == 0)
         {
-            var randomLetter = GenerateRandomLetter();
-            var wordPosition = _rand.Next(_alphabetDictionary[randomLetter].Count);
-            var word = _alphabetDictionary[randomLetter][wordPosition];
-            if (CheckIfWordExist(word)) return;
-            if (i != _correctAnswerPosition)
+            skippedLetters++;
+            SkipLetter();
+        }
+
+        else
+        {
+            var correctWord = _alphabetDictionary[l][_rand.Next(_alphabetDictionary[l].Count)];
+            _wordsList[_correctAnswerPosition].text = correctWord;
+            _wordsList[_correctAnswerPosition].text = _letterType.Equals("A") ? _wordsList[_correctAnswerPosition].text.ToUpperInvariant() : _wordsList[_correctAnswerPosition].text.ToLowerInvariant();
+            _buttonsList[_correctAnswerPosition].image.sprite = Resources.Load<Sprite>($"Images/{_imagesFolder}/{correctWord.ToLowerInvariant()}");
+            _clip[_correctAnswerPosition] = Resources.Load<AudioClip>($"Audios/{_imagesFolder}/{_buttonsList[_correctAnswerPosition].image.sprite.name.ToLowerInvariant()}");
+
+            for (int i = 0; i < _wordsList.Count; i++)
             {
-                _wordsList[i].text = word;
-                _wordsList[i].text = _letterType.Equals("A") ? _wordsList[i].text.ToUpperInvariant() : _wordsList[i].text.ToLowerInvariant();
-                _buttonsList[i].image.sprite = Resources.Load<Sprite>($"Images/{_imagesFolder}/{word.ToLowerInvariant()}");
-                _clip[i] = Resources.Load<AudioClip>($"Audios/{_imagesFolder}/{_buttonsList[i].image.sprite.name.ToLowerInvariant()}");
+                var randomLetter = GenerateRandomLetter(i, lettersArray);
+                int wordPosition;
+                string word;
+
+                if (_alphabetDictionary[randomLetter].Count > 1)
+                {
+                    wordPosition = _rand.Next(_alphabetDictionary[randomLetter].Count);
+                    word = _alphabetDictionary[randomLetter][wordPosition];
+                }
+                else
+                {
+                    word = _alphabetDictionary[randomLetter][0];
+                }
+
+                if (CheckIfWordExist(word)) return;
+                if (i != _correctAnswerPosition)
+                {
+                    _wordsList[i].text = word;
+                    _wordsList[i].text = _letterType.Equals("A") ? _wordsList[i].text.ToUpperInvariant() : _wordsList[i].text.ToLowerInvariant();
+                    _buttonsList[i].image.sprite = Resources.Load<Sprite>($"Images/{_imagesFolder}/{word.ToLowerInvariant()}");
+                    _clip[i] = Resources.Load<AudioClip>($"Audios/{_imagesFolder}/{_buttonsList[i].image.sprite.name.ToLowerInvariant()}");
+                }
+                _wordsList[i].autoSizeTextContainer = true;
             }
-            _wordsList[i].autoSizeTextContainer = true;
         }
     }
 
@@ -344,13 +437,36 @@ public class GameScript : MonoBehaviour
         else if (button.name.Contains("hird")) _audioSource.PlayOneShot(_clip[2]);
     }
 
-    private string GenerateRandomLetter()
+    private string GenerateRandomLetter(int currentIndex, string[] polje)
     {
         var l = _letter.text;
+
+        var otherPreposition = 0;
+
+        for (int i = 0; i < 3; i++)
+        {
+            if (i != _correctAnswerPosition && i != currentIndex)
+                otherPreposition = i;
+        }
+
+        string last;
+        if(_slovoStatus == "Prvo")
+        {
+            last = _wordsList[otherPreposition].text.Substring(0, 1).ToUpper();
+        }
+        else
+        {
+            last = _wordsList[otherPreposition].text.Substring(_wordsList[otherPreposition].text.Length - 1).ToUpper();
+        }
+        
         while (true)
         {
-            var randomLetterPosition = _rand.Next(_letters.Length);
-            if (!_letters[randomLetterPosition].Equals(l)) return _letters[randomLetterPosition];
+            var randomLetterPosition = _rand.Next(polje.Length);
+            
+            if (_alphabetDictionary[polje[randomLetterPosition]].Count() == 0) {
+                continue;
+            };
+            if (!polje[randomLetterPosition].Equals(l.ToUpper()) && !polje[randomLetterPosition].Equals(last)) return polje[randomLetterPosition];
         }
     }
 

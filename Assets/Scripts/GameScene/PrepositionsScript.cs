@@ -144,7 +144,7 @@ public class PrepositionsScript : MonoBehaviour
         {
             percentage = 0;
         }
-        GameObject.Find("ScoreScript").GetComponent<ScoreScript>().save_score("Prijedlozi", Math.Round(percentage, 1), DateTime.Now.ToString("M/d/yyyy"));
+        GameObject.Find("ScoreScript").GetComponent<ScoreScript>().save_score("Prijedlozi", "", Math.Round(percentage, 1), DateTime.Now.ToString("d/M/yyyy"));
         percentage = 0;
         count = 0;
         points = 0;

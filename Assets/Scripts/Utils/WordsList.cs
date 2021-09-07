@@ -130,10 +130,10 @@ namespace Assets.Scripts.Utils
                     _wordsList = new List<string>() { "Deva" };
                     break;
                 case "DŽ":
-                    _wordsList = new List<string>() { "" };
+                    _wordsList = new List<string>();
                     break;
                 case "Đ":
-                    _wordsList = new List<string>() { "" };
+                    _wordsList = new List<string>();
                     break;
                 case "E":
                     _wordsList = new List<string>() { "Emu" };
@@ -169,7 +169,7 @@ namespace Assets.Scripts.Utils
                     _wordsList = new List<string>() { "Nosorog" };
                     break;
                 case "NJ":
-                    _wordsList = new List<string>() { "" };
+                    _wordsList = new List<string>();
                     break;
                 case "O":
                     _wordsList = new List<string>() { "Ovca" };
@@ -190,7 +190,7 @@ namespace Assets.Scripts.Utils
                     _wordsList = new List<string>() { "Tigar" };
                     break;
                 case "U":
-                    _wordsList = new List<string>() { "" };
+                    _wordsList = new List<string>();
                     break;
                 case "V":
                     _wordsList = new List<string>() { "Vjeverica" };
@@ -237,7 +237,7 @@ namespace Assets.Scripts.Utils
                     _wordsList = new List<string>() { "Đuveđ" };
                     break;
                 case "E":
-                    _wordsList = new List<string>() { "" };
+                    _wordsList = new List<string>();
                     break;
                 case "F":
                     _wordsList = new List<string>() { "Feferoni" };
@@ -249,7 +249,7 @@ namespace Assets.Scripts.Utils
                     _wordsList = new List<string>() { "Hrenovke" };
                     break;
                 case "I":
-                    _wordsList = new List<string>() { "" };
+                    _wordsList = new List<string>();
                     break;
                 case "J":
                     _wordsList = new List<string>() { "Jagoda" };
